@@ -51,7 +51,7 @@ function TimetablePreview() {
   ];
 
   return (
-    <div style={{ position: "relative", width: 440, margin: "10px 0", paddingLeft: 64 }}>
+    <div style={{ position: "relative", width: 440, margin: "10px 0", paddingLeft: 104 }}>
       {/* 1. Main Timetable Card */}
       <div
         style={{
@@ -100,8 +100,8 @@ function TimetablePreview() {
       <div
         style={{
           position: "absolute",
-          top: 10,
-          left: 239,
+          top: 9,
+          left: 326,
           background: "#ffffff",
           borderRadius: 14,
           padding: "9px 14px",
@@ -140,7 +140,7 @@ function TimetablePreview() {
         style={{
           position: "relative",
           marginTop: 14,
-          marginLeft: 110,
+          marginLeft: 180,
           background: "#ffffff",
           borderRadius: 14,
           padding: "9px 12px",
