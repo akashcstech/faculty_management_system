@@ -1,0 +1,112 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-display: "Fraunces", Georgia, serif;
+  --font-sans: "Manrope", system-ui, sans-serif;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+:root {
+  --radius: 0.75rem;
+  --background: oklch(0.975 0.012 85);
+  --foreground: oklch(0.22 0.03 160);
+  --card: oklch(0.995 0.005 85);
+  --card-foreground: oklch(0.22 0.03 160);
+  --popover: oklch(0.995 0.005 85);
+  --popover-foreground: oklch(0.22 0.03 160);
+  --primary: oklch(0.38 0.08 160);
+  --primary-foreground: oklch(0.97 0.015 85);
+  --secondary: oklch(0.93 0.03 150);
+  --secondary-foreground: oklch(0.3 0.07 160);
+  --muted: oklch(0.94 0.012 85);
+  --muted-foreground: oklch(0.5 0.025 160);
+  --accent: oklch(0.78 0.13 75);
+  --accent-foreground: oklch(0.25 0.05 60);
+  --destructive: oklch(0.55 0.19 28);
+  --destructive-foreground: oklch(0.98 0 0);
+  --success: oklch(0.52 0.12 155);
+  --warning: oklch(0.7 0.14 70);
+  --border: oklch(0.88 0.018 85);
+  --input: oklch(0.86 0.02 85);
+  --ring: oklch(0.38 0.08 160);
+  --gradient-hero: linear-gradient(155deg, oklch(0.32 0.07 160), oklch(0.24 0.05 175));
+  --shadow-soft: 0 1px 2px oklch(0.3 0.03 160 / 6%), 0 8px 24px -12px oklch(0.3 0.05 160 / 18%);
+}
+
+@layer base {
+  * { border-color: var(--color-border); }
+  body { background-color: var(--color-background); color: var(--color-foreground); font-family: var(--font-sans); }
+}
+
+@utility font-display { font-family: var(--font-display); font-weight: 600; letter-spacing: -0.01em; }
+
+@layer components {
+  .panel { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 1.5rem; box-shadow: var(--shadow-soft); }
+  .hero-side { background: var(--gradient-hero); color: var(--primary-foreground); flex-direction: column; justify-content: space-between; padding: 3rem; }
+  .topbar { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1.5rem; background: color-mix(in oklab, var(--background) 85%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); }
+  .role-pill { background: var(--accent); color: var(--accent-foreground); font-weight: 700; font-size: 0.7rem; letter-spacing: 0.08em; padding: 0.2rem 0.6rem; border-radius: 999px; }
+  .btn { display: inline-flex; align-items: center; gap: 0.4rem; border-radius: var(--radius-md); padding: 0.5rem 0.9rem; font-size: 0.875rem; font-weight: 600; transition: all 0.15s; cursor: pointer; white-space: nowrap; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-primary { background: var(--primary); color: var(--primary-foreground); }
+  .btn-primary:hover { filter: brightness(1.12); }
+  .btn-soft { background: var(--secondary); color: var(--secondary-foreground); }
+  .btn-soft:hover { filter: brightness(0.96); }
+  .btn-ghost { background: transparent; color: var(--foreground); padding: 0.4rem 0.6rem; }
+  .btn-ghost:hover { background: var(--muted); }
+  .btn-danger { background: var(--destructive); color: var(--destructive-foreground); }
+  .field { width: 100%; background: var(--card); border: 1px solid var(--input); border-radius: var(--radius-md); padding: 0.5rem 0.7rem; font-size: 0.9rem; }
+  .field:focus { outline: 2px solid color-mix(in oklab, var(--ring) 40%, transparent); outline-offset: 1px; }
+  .field:disabled { background: var(--muted); }
+  .tabs { display: flex; gap: 0.25rem; flex-wrap: wrap; border-bottom: 1px solid var(--border); }
+  .tab { padding: 0.6rem 1rem; font-size: 0.9rem; font-weight: 600; color: var(--muted-foreground); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .tab:hover { color: var(--foreground); }
+  .tab-active { color: var(--primary); border-color: var(--accent); }
+  .data-table { width: 100%; font-size: 0.875rem; border-collapse: collapse; }
+  .data-table th { text-align: left; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted-foreground); padding: 0.5rem; border-bottom: 1px solid var(--border); }
+  .data-table td { padding: 0.55rem 0.5rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .grid-table { width: 100%; border-collapse: separate; border-spacing: 4px; font-size: 0.8rem; }
+  .grid-table th { color: var(--muted-foreground); font-weight: 600; padding: 0.3rem; }
+  .grid-table td { background: var(--muted); border-radius: var(--radius-sm); min-width: 110px; height: 56px; vertical-align: top; padding: 4px; }
+  .slot { background: var(--card); border-left: 3px solid var(--primary); border-radius: 6px; padding: 4px 6px; margin-bottom: 3px; }
+  .badge { display: inline-block; font-size: 0.7rem; font-weight: 700; text-transform: capitalize; padding: 0.15rem 0.55rem; border-radius: 999px; background: var(--muted); color: var(--muted-foreground); }
+  .badge-ok { background: color-mix(in oklab, var(--success) 18%, transparent); color: var(--success); }
+  .badge-bad { background: color-mix(in oklab, var(--destructive) 15%, transparent); color: var(--destructive); }
+  .badge-warn { background: color-mix(in oklab, var(--warning) 25%, transparent); color: var(--accent-foreground); }
+  .stat { display: flex; gap: 1rem; align-items: center; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 1.1rem; box-shadow: var(--shadow-soft); }
+  .stat-icon { display: grid; place-items: center; width: 2.75rem; height: 2.75rem; border-radius: var(--radius-lg); background: var(--secondary); color: var(--primary); }
+  .notice { border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: var(--radius-md); padding: 0.9rem 1rem; background: var(--background); }
+  .download-bar { border-top: 1px solid var(--border); background: var(--card); padding: 1.5rem; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+  /* Login page two-column layout */
+  @media (min-width: 1024px) {
+    .lg-two-col { grid-template-columns: 1fr 1fr !important; }
+    .login-hero { display: flex !important; }
+  }
+}

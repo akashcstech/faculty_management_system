@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Build artifacts
+dist/
+dist-ssr/
+.output/
+.tanstack/
+
+# Database files
+*.db
+*.db-wal
+*.db-shm
+
+# Environment & logs
+*.log
+.env
+.env.*
+!.env.example
+
+# Temporary files
+*.png
+*.tmp
+
+# System & Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
