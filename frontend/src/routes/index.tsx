@@ -52,93 +52,90 @@ function TimetablePreview() {
 
   return (
     <div style={{ position: "relative", width: 440, margin: "10px 0", paddingLeft: 64 }}>
-      {/* Timetable Card + Floating "No clashes found" Badge Container */}
-      <div style={{ position: "relative", width: 250 }}>
-        {/* 1. Main Timetable Card */}
-        <div
-          style={{
-            background: "#ffffff",
-            borderRadius: 16,
-            padding: "14px 16px",
-            boxShadow: "0 18px 40px rgba(0, 0, 0, 0.25)",
-            width: 250,
-          }}
-        >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-            <span style={{ fontWeight: 700, fontSize: 13, color: "#1e293b" }}>Weekly timetable</span>
-            <span style={{ fontSize: 11, fontWeight: 500, color: "#94a3b8" }}>P1</span>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 5, marginBottom: 6 }}>
-            {days.map((d) => (
-              <div key={d} style={{ textAlign: "center", fontSize: 10, fontWeight: 600, color: "#94a3b8" }}>
-                {d}
-              </div>
-            ))}
-          </div>
-          {rows.map((row, ri) => (
-            <div key={ri} style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 5, marginBottom: 5 }}>
-              {row.map((item, ci) => (
-                <div
-                  key={ci}
-                  style={{
-                    background: item.bg,
-                    color: item.color,
-                    borderRadius: 6,
-                    padding: "5px 2px",
-                    textAlign: "center",
-                    fontSize: 10,
-                    fontWeight: 700,
-                    letterSpacing: "-0.01em",
-                  }}
-                >
-                  {item.label}
-                </div>
-              ))}
+      {/* 1. Main Timetable Card */}
+      <div
+        style={{
+          background: "#ffffff",
+          borderRadius: 16,
+          padding: "14px 16px",
+          boxShadow: "0 18px 40px rgba(0, 0, 0, 0.25)",
+          width: 250,
+        }}
+      >
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+          <span style={{ fontWeight: 700, fontSize: 13, color: "#1e293b" }}>Weekly timetable</span>
+          <span style={{ fontSize: 11, fontWeight: 500, color: "#94a3b8" }}>P1</span>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 5, marginBottom: 6 }}>
+          {days.map((d) => (
+            <div key={d} style={{ textAlign: "center", fontSize: 10, fontWeight: 600, color: "#94a3b8" }}>
+              {d}
             </div>
           ))}
         </div>
+        {rows.map((row, ri) => (
+          <div key={ri} style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 5, marginBottom: 5 }}>
+            {row.map((item, ci) => (
+              <div
+                key={ci}
+                style={{
+                  background: item.bg,
+                  color: item.color,
+                  borderRadius: 6,
+                  padding: "5px 2px",
+                  textAlign: "center",
+                  fontSize: 10,
+                  fontWeight: 700,
+                  letterSpacing: "-0.01em",
+                }}
+              >
+                {item.label}
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
 
-        {/* 2. Floating "No clashes found" Badge (anchored to Timetable Card) */}
+      {/* 2. Floating "No clashes found" Card (separated sibling in the same div) */}
+      <div
+        style={{
+          position: "absolute",
+          top: 10,
+          left: 239,
+          background: "#ffffff",
+          borderRadius: 14,
+          padding: "9px 14px",
+          boxShadow: "0 12px 32px rgba(0, 0, 0, 0.22)",
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          width: 175,
+          border: "1px solid rgba(0, 0, 0, 0.04)",
+          zIndex: 2,
+        }}
+      >
         <div
           style={{
-            position: "absolute",
-            top: 10,
-            left: 175,
-            background: "#ffffff",
-            borderRadius: 14,
-            padding: "9px 14px",
-            boxShadow: "0 12px 32px rgba(0, 0, 0, 0.22)",
+            width: 26,
+            height: 26,
+            borderRadius: "50%",
+            background: "#ecfdf5",
+            border: "1.5px solid #a7f3d0",
             display: "flex",
             alignItems: "center",
-            gap: 10,
-            width: 175,
-            border: "1px solid rgba(0, 0, 0, 0.04)",
-            zIndex: 2,
+            justifyContent: "center",
+            flexShrink: 0,
           }}
         >
-          <div
-            style={{
-              width: 26,
-              height: 26,
-              borderRadius: "50%",
-              background: "#ecfdf5",
-              border: "1.5px solid #a7f3d0",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-            }}
-          >
-            <Check style={{ width: 13, height: 13, color: "#059669", strokeWidth: 3 }} />
-          </div>
-          <div>
-            <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: "#1e293b", lineHeight: 1.2 }}>No clashes found</p>
-            <p style={{ margin: "2px 0 0 0", fontSize: 9.5, color: "#64748b", lineHeight: 1.1 }}>Rooms and teachers checked</p>
-          </div>
+          <Check style={{ width: 13, height: 13, color: "#059669", strokeWidth: 3 }} />
+        </div>
+        <div>
+          <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: "#1e293b", lineHeight: 1.2 }}>No clashes found</p>
+          <p style={{ margin: "2px 0 0 0", fontSize: 9.5, color: "#64748b", lineHeight: 1.1 }}>Rooms and teachers checked</p>
         </div>
       </div>
 
-      {/* 3. Floating "Teacher attendance" Badge (positioned below, shifted right) */}
+      {/* 3. Floating "Teacher attendance" Card (sibling in the same div) */}
       <div
         style={{
           position: "relative",
