@@ -18,7 +18,16 @@ export const today = () => new Date().toISOString().slice(0, 10);
 
 export const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
 export const PERIODS = [1, 2, 3, 4, 5, 6] as const;
-export const ROOMS = ["R101", "R102", "R103", "R201", "R202", "R203", "LAB1", "LAB2"];
+
+// Fixed room per class: one dedicated classroom for each (department, semester) pair.
+// Rule: 18 classes total — do NOT share rooms across semesters.
+export const CLASS_ROOM: Record<string, Record<number, string>> = {
+  BCA:  { 1: "R101", 2: "R102", 3: "R103", 4: "R104", 5: "R105", 6: "R106" },
+  BCOM: { 1: "R107", 2: "R108", 3: "R109", 4: "R110", 5: "R111", 6: "R112" },
+  BSC:  { 1: "R113", 2: "R114", 3: "R115", 4: "R116", 5: "R117", 6: "R118" },
+};
+// Flat list for backward-compat (e.g. conflict checkers that display room names)
+export const ROOMS = Object.values(CLASS_ROOM).flatMap(m => Object.values(m));
 
 // Simple bcrypt-like hash using Node built-in crypto (no bcryptjs needed)
 export function hashPassword(password: string): string {
@@ -59,19 +68,25 @@ export function generateTimetable(
   const created: any[] = [];
   let seed = 0;
   for (const t of teachers) {
+    // Fixed room for this class — no room scanning needed
+    const room = CLASS_ROOM[departmentId]?.[t.semester];
+    if (!room) { seed += 3; continue; } // skip if no mapping defined
     let placed = 0;
     for (let k = 0; k < DAYS.length * PERIODS.length && placed < perTeacher; k++) {
       const idx = (k * 7 + seed) % (DAYS.length * PERIODS.length);
       const day = DAYS[idx % DAYS.length] ?? "Mon";
       const period = PERIODS[Math.floor(idx / DAYS.length)] ?? 1;
       const cls = `${dep?.name ?? departmentId}-S${t.semester}`;
-      const room = ROOMS.find((r) =>
-        findConflictsInternal(
-          [...kept, ...created],
-          { faculty_id: t.faculty_id, day, period, room: r, subject: t.subject, semester: t.semester, class: cls }
-        ).length === 0
+      // Only block if the same teacher is already assigned at this day+period
+      const teacherConflict = [...kept, ...created].some(
+        (x) => x.day === day && x.period === period && x.faculty_id === t.faculty_id
       );
-      if (!room) continue;
+      if (teacherConflict) continue;
+      // Also block duplicate slot for the same class at same day+period
+      const classConflict = [...kept, ...created].some(
+        (x) => x.day === day && x.period === period && x.class === cls
+      );
+      if (classConflict) continue;
       created.push({ _id: oid(), faculty_id: t.faculty_id, day, period, room, subject: t.subject, semester: t.semester, class: cls });
       placed++;
     }
@@ -157,16 +172,28 @@ function seedData() {
   const hHash = hashPassword("hod123");
 
   const facultyData = [
-    { _id: oid(), faculty_id: "H100", name: "Dr. Meera Iyer",    department_id: "BCA",  subject: "Data Structures",     semester: 3, role: "hod",     password_hash: hHash,  active: 1 },
-    { _id: oid(), faculty_id: "T101", name: "Arjun Rao",          department_id: "BCA",  subject: "Java Programming",    semester: 3, role: "teacher", password_hash: tHash,  active: 1 },
-    { _id: oid(), faculty_id: "T102", name: "Kavya Nair",         department_id: "BCA",  subject: "DBMS",                semester: 5, role: "teacher", password_hash: tHash,  active: 1 },
-    { _id: oid(), faculty_id: "T103", name: "Rohit Sharma",       department_id: "BCA",  subject: "Web Technologies",    semester: 1, role: "teacher", password_hash: tHash,  active: 1 },
-    { _id: oid(), faculty_id: "H200", name: "Dr. Sanjay Gupta",  department_id: "BCOM", subject: "Corporate Accounting", semester: 3, role: "hod",     password_hash: hHash,  active: 1 },
-    { _id: oid(), faculty_id: "T201", name: "Priya Menon",        department_id: "BCOM", subject: "Business Law",        semester: 1, role: "teacher", password_hash: tHash,  active: 1 },
-    { _id: oid(), faculty_id: "T202", name: "Imran Khan",         department_id: "BCOM", subject: "Income Tax",          semester: 5, role: "teacher", password_hash: tHash,  active: 1 },
-    { _id: oid(), faculty_id: "H300", name: "Dr. Lakshmi Pillai",department_id: "BSC",  subject: "Physics",             semester: 3, role: "hod",     password_hash: hHash,  active: 1 },
-    { _id: oid(), faculty_id: "T301", name: "Neha Joshi",         department_id: "BSC",  subject: "Chemistry",           semester: 1, role: "teacher", password_hash: tHash,  active: 1 },
-    { _id: oid(), faculty_id: "T302", name: "Vikram Das",         department_id: "BSC",  subject: "Mathematics",         semester: 5, role: "teacher", password_hash: tHash,  active: 1 },
+    // ── BCA (R101–R106) ──────────────────────────────────────────────────────
+    { _id: oid(), faculty_id: "T103", name: "Rohit Sharma",        department_id: "BCA",  subject: "Web Technologies",    semester: 1, role: "teacher", password_hash: tHash, active: 1 },
+    { _id: oid(), faculty_id: "T104", name: "Ananya Singh",        department_id: "BCA",  subject: "C Programming",       semester: 2, role: "teacher", password_hash: tHash, active: 1 },
+    { _id: oid(), faculty_id: "H100", name: "Dr. Meera Iyer",      department_id: "BCA",  subject: "Data Structures",     semester: 3, role: "hod",     password_hash: hHash, active: 1 },
+    { _id: oid(), faculty_id: "T101", name: "Arjun Rao",           department_id: "BCA",  subject: "Java Programming",    semester: 3, role: "teacher", password_hash: tHash, active: 1 },
+    { _id: oid(), faculty_id: "T105", name: "Deepak Verma",        department_id: "BCA",  subject: "Operating Systems",   semester: 4, role: "teacher", password_hash: tHash, active: 1 },
+    { _id: oid(), faculty_id: "T102", name: "Kavya Nair",          department_id: "BCA",  subject: "DBMS",                semester: 5, role: "teacher", password_hash: tHash, active: 1 },
+    { _id: oid(), faculty_id: "T106", name: "Sneha Patel",         department_id: "BCA",  subject: "Software Engineering",semester: 6, role: "teacher", password_hash: tHash, active: 1 },
+    // ── B.Com (R107–R112) ────────────────────────────────────────────────────
+    { _id: oid(), faculty_id: "T201", name: "Priya Menon",         department_id: "BCOM", subject: "Business Law",        semester: 1, role: "teacher", password_hash: tHash, active: 1 },
+    { _id: oid(), faculty_id: "T203", name: "Suresh Kumar",        department_id: "BCOM", subject: "Financial Accounting",semester: 2, role: "teacher", password_hash: tHash, active: 1 },
+    { _id: oid(), faculty_id: "H200", name: "Dr. Sanjay Gupta",   department_id: "BCOM", subject: "Corporate Accounting",semester: 3, role: "hod",     password_hash: hHash, active: 1 },
+    { _id: oid(), faculty_id: "T204", name: "Rekha Sharma",        department_id: "BCOM", subject: "Cost Accounting",     semester: 4, role: "teacher", password_hash: tHash, active: 1 },
+    { _id: oid(), faculty_id: "T202", name: "Imran Khan",          department_id: "BCOM", subject: "Income Tax",          semester: 5, role: "teacher", password_hash: tHash, active: 1 },
+    { _id: oid(), faculty_id: "T205", name: "Anita Roy",           department_id: "BCOM", subject: "Auditing",            semester: 6, role: "teacher", password_hash: tHash, active: 1 },
+    // ── BSc (R113–R118) ──────────────────────────────────────────────────────
+    { _id: oid(), faculty_id: "T301", name: "Neha Joshi",          department_id: "BSC",  subject: "Chemistry",           semester: 1, role: "teacher", password_hash: tHash, active: 1 },
+    { _id: oid(), faculty_id: "T303", name: "Arun Pillai",         department_id: "BSC",  subject: "Biology",             semester: 2, role: "teacher", password_hash: tHash, active: 1 },
+    { _id: oid(), faculty_id: "H300", name: "Dr. Lakshmi Pillai",  department_id: "BSC",  subject: "Physics",             semester: 3, role: "hod",     password_hash: hHash, active: 1 },
+    { _id: oid(), faculty_id: "T304", name: "Ramesh Nair",         department_id: "BSC",  subject: "Zoology",             semester: 4, role: "teacher", password_hash: tHash, active: 1 },
+    { _id: oid(), faculty_id: "T302", name: "Vikram Das",          department_id: "BSC",  subject: "Mathematics",         semester: 5, role: "teacher", password_hash: tHash, active: 1 },
+    { _id: oid(), faculty_id: "T305", name: "Pooja Krishnan",      department_id: "BSC",  subject: "Statistics",          semester: 6, role: "teacher", password_hash: tHash, active: 1 },
   ];
 
   for (const d of departments) {
