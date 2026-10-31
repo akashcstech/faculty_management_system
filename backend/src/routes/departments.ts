@@ -38,5 +38,31 @@ router.patch("/:id", requireAuth, requireRole("admin"), (req, res) => {
   res.json({ ...dept, name: newName, active: newActive === 1 });
 });
 
+router.delete("/:id", requireAuth, requireRole("admin"), (req, res) => {
+  const { id } = req.params;
+  const dept = db.prepare("SELECT * FROM departments WHERE department_id = ?").get(id) as any;
+  if (!dept) { res.status(404).json({ error: "Department not found" }); return; }
+  // Cascade: remove timetable entries, faculty, then department
+  db.exec("BEGIN");
+  try {
+    // get faculty IDs in this dept for cascade timetable delete
+    const facultyIds = (db.prepare("SELECT faculty_id FROM faculty WHERE department_id = ?").all(id) as any[]).map((f) => f.faculty_id);
+    for (const fid of facultyIds) {
+      db.prepare("DELETE FROM timetable WHERE faculty_id = ?").run(fid);
+      db.prepare("DELETE FROM attendance WHERE faculty_id = ?").run(fid);
+      db.prepare("DELETE FROM leaves WHERE faculty_id = ?").run(fid);
+    }
+    db.prepare("DELETE FROM faculty WHERE department_id = ?").run(id);
+    db.prepare("DELETE FROM notices WHERE department_id = ?").run(id);
+    db.prepare("DELETE FROM departments WHERE department_id = ?").run(id);
+    db.exec("COMMIT");
+  } catch (e) {
+    db.exec("ROLLBACK");
+    res.status(500).json({ error: "Delete failed" }); return;
+  }
+  addAudit((req as any).user, `department delete ${id}`);
+  res.json({ ok: true });
+});
+
 export default router;
 

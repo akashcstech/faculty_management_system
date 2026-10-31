@@ -199,6 +199,12 @@ async function syncAction(action: string, draft: DB) {
     if (d) await apiFetch(`/departments/${dept_id}`, { method: "PATCH", body: JSON.stringify({ active: d.active }) });
     return;
   }
+  // department delete <ID>
+  if (action.startsWith("department delete ")) {
+    const dept_id = action.split(" ")[2];
+    await apiFetch(`/departments/${dept_id}`, { method: "DELETE" });
+    return;
+  }
   // faculty add <ID>
   if (action.startsWith("faculty add ")) {
     const fid = action.split(" ")[2];

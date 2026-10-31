@@ -20,6 +20,27 @@ export function Departments() {
     mutate((d) => { d.departments.push({ _id: oid(), department_id: id, name: n, active: true }); }, `department add ${id}`);
     setName(""); f.ok(`Added ${n}`);
   };
+  const deleteDept = (d: { department_id: string; name: string }) => {
+    const facultyCount = db.faculty.filter((x) => x.department_id === d.department_id).length;
+    const msg = facultyCount > 0
+      ? `Delete "${d.name}"? This will permanently remove ${facultyCount} faculty member(s), their timetable slots, attendance records and all department notices. This cannot be undone.`
+      : `Delete "${d.name}" permanently? This cannot be undone.`;
+    if (!window.confirm(msg)) return;
+    mutate(
+      (x) => {
+        // cascade remove in local state
+        const fids = x.faculty.filter((f) => f.department_id === d.department_id).map((f) => f.faculty_id);
+        x.timetable = x.timetable.filter((t) => !fids.includes(t.faculty_id));
+        x.attendance = x.attendance.filter((a) => !fids.includes(a.faculty_id));
+        x.leaves = x.leaves.filter((l) => !fids.includes(l.faculty_id));
+        x.faculty = x.faculty.filter((f) => f.department_id !== d.department_id);
+        x.notices = x.notices.filter((n) => n.department_id !== d.department_id);
+        x.departments = x.departments.filter((dep) => dep.department_id !== d.department_id);
+      },
+      `department delete ${d.department_id}`
+    );
+    f.ok(`Deleted ${d.name}`);
+  };
   return (
     <Card title="Departments">
       <div className="mb-4 flex flex-wrap items-end gap-2">
@@ -38,6 +59,7 @@ export function Departments() {
             ? <Btn variant="soft" onClick={() => { mutate((x) => { const t = x.departments.find((y) => y.department_id === d.department_id); if (t) t.name = edit.name.trim() || t.name; }, `department rename ${d.department_id}`); setEdit(null); }}>Save</Btn>
             : <Btn variant="ghost" onClick={() => setEdit({ id: d.department_id, name: d.name })}><Pencil className="h-4 w-4" /> Rename</Btn>}
           <Btn variant="ghost" onClick={() => mutate((x) => { const t = x.departments.find((y) => y.department_id === d.department_id); if (t) t.active = !t.active; }, `department toggle ${d.department_id}`)}>{d.active ? "Deactivate" : "Activate"}</Btn>
+          <Btn variant="ghost" onClick={() => deleteDept(d)}><Trash2 className="h-4 w-4 text-red-500" /></Btn>
         </div>,
       ])} />
       <Flash msg={f.msg} />
